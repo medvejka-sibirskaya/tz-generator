@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'gost' %}ТЗ по ГОСТ — создать за 100 ₽{% else %}Облегчённое ТЗ бесплатно — конструктор{% endif %}{% endblock %}
+{% block description %}{% if mode == 'gost' %}Заполни форму — получи полное техническое задание по ГОСТ 19/34 за 100 ₽.{% else %}Конструктор облегчённого ТЗ: ответь на вопросы — получи готовое техническое задание бесплатно.{% endif %}{% endblock %}
+{% block content %}
+<section class="form-page">
+  {% if mode == 'gost' %}
+  <h1>ТЗ по <em>ГОСТ</em></h1>
+  <p class="note">Полная формальная структура для договорных заказов. Стоимость — 100 ₽, оплата откроется после генерации.</p>
+  {% else %}
+  <h1>Соберём ТЗ <em>за 5 минут</em></h1>
+  <p class="note">Выберите тип проекта — форма подстроится под него и покажет нужные поля. Бесплатно.</p>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('generate') }}" class="fields">
+    <input type="hidden" name="mode" value="{{ mode }}">
+    {% if mode == 'light' %}
+    <label>Тип проекта *
+      <select name="project_type" id="ptype">
+        <option value="bot">Чат-бот / Telegram-бот</option>
+        <option value="ai">ИИ-ассистент</option>
+        <option value="automation">Автоматизация / интеграция</option>
+        <option value="script">Скрипт / обработка данных</option>
+        <option value="site">Сайт / веб-приложение</option>
+        <option value="creative">Дизайн / тексты / медиа</option>
+      </select>
+    </label>
+    {% endif %}
+
+    <label>Название проекта *
+      <input type="text" name="name" required placeholder="Например: Telegram-бот записи к мастеру">
+    </label>
+    <label>Что делаем (кратко о проекте) *
+      <textarea name="what" rows="3" required placeholder="Что должно получиться в итоге, какая сейчас проблема"></textarea>
+    </label>
+    <label>Цель
+      <textarea name="goal" rows="2" placeholder="Зачем это заказчику / какую проблему решает"></textarea>
+    </label>
+    <label>Целевая аудитория / пользователи
+      <input type="text" name="users" placeholder="Кто будет пользоваться результатом">
+    </label>
+
+    <div data-types="bot ai site">
+      <label>Сценарии использования (каждый с новой строки)
+        <textarea name="stories" rows="3" placeholder="Как пользователь, я хочу… чтобы…"></textarea>
+      </label>
+    </div>
+    <div data-types="bot ai">
+      <label>Риски и запасной план (fallback)
+        <textarea name="risks" rows="2" placeholder="Например: если API недоступен — бот пишет пользователю и повторяет позже"></textarea>
+      </label>
+    </div>
+    <div data-types="automation">
+      <label>Интеграции и платформы
+        <input type="text" name="integrations" placeholder="Google Таблицы, Telegram, amoCRM; n8n на сервере заказчика">
+      </label>
+    </div>
+    <div data-types="script">
+      <label>Ошибки и безопасность
+        <textarea name="errors" rows="2" placeholder="Что делать с битыми строками и лимитами; где хранятся доступы"></textarea>
+      </label>
+    </div>
+    <div data-types="creative">
+      <label>Стиль и референсы
+        <textarea name="style" rows="2" placeholder="Примеры, мудборд, что нравится / не нравится"></textarea>
+      </label>
+      <label>Состав поставки (каждый пункт с новой строки)
+        <textarea name="deliverables" rows="3" placeholder="— логотип в SVG и PNG&#10;— исходники&#10;— шрифты"></textarea>
+      </label>
+      <label>Правки (сколько итераций включено)
+        <input type="text" name="revisions" placeholder="2 итерации правок, далее — по прайсу">
+      </label>
+    </div>
+
+    <label>Основные функции (каждая с новой строки)
+      <textarea name="features" rows="5" placeholder="1. Регистрация по номеру телефона&#10;2. Запись на услугу&#10;3. Напоминание за сутки"></textarea>
+    </label>
+    <label>Стек и ограничения
+      <input type="text" name="stack" placeholder="Python, Telegram Bot API; хостинг заказчика">
+    </label>
+    <label>Сроки
+      <input type="text" name="deadline" placeholder="до 15.10.2026, этапы по согласованию">
+    </label>
+    <label>Бюджет
+      <input type="text" name="budget" placeholder="фикс 30 000 ₽ или почасовая ставка">
+    </label>
+    <label>Что требуется от заказчика
+      <textarea name="client_provides" rows="2" placeholder="Доступы к API, контент, ответы на вопросы в течение 2 дней"></textarea>
+    </label>
+    <label>Условия оплаты
+      <input type="text" name="payment" placeholder="50% предоплата, 50% после приёмки">
+    </label>
+    <label>Поддержка после сдачи
+      <input type="text" name="support" placeholder="14 дней бесплатно исправляю баги, дальше — отдельно">
+    </label>
+    <label>Критерии приёмки (каждый с новой строки)
+      <textarea name="acceptance" rows="3" placeholder="— бот отвечает на команды&#10;— запись попадает в таблицу"></textarea>
+    </label>
+    <label>Что не входит в объём работ
+      <textarea name="excluded" rows="2" placeholder="Дизайн с нуля, наполнение контентом"></textarea>
+    </label>
+    {% if mode == 'gost' %}
+    <label>Заказчик
+      <input type="text" name="customer" placeholder="ИП Иванов И.И.">
+    </label>
+    <label>Исполнитель
+      <input type="text" name="contractor" placeholder="ИП Петрова А.А.">
+    </label>
+    {% endif %}
+    <button class="btn primary" type="submit">Сгенерировать ТЗ</button>
+  </form>
+</section>
+
+{% if mode == 'light' %}
+<script>
+// Показываем только поля, относящиеся к выбранному типу проекта
+const ptype = document.getElementById('ptype');
+function syncFields() {
+  document.querySelectorAll('[data-types]').forEach(el => {
+    el.hidden = !el.dataset.types.split(' ').includes(ptype.value);
+  });
+}
+ptype.addEventListener('change', syncFields);
+syncFields();
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Готовое ТЗ — TZ Generator{% endblock %}
+{% block content %}
+<section class="result-page">
+  <h1>{% if mode == 'gost' %}ТЗ по ГОСТ{% else %}Облегчённое ТЗ{% endif %} готово</h1>
+  {% if polished %}<p class="note">✨ Текст отполирован ИИ: исправлены ошибки и неясные формулировки.</p>{% endif %}
+  <p class="note">Текст можно поправить вручную — скачивание возьмёт текущую версию.</p>
+  <div class="doc">
+    <textarea id="tz-text" spellcheck="true">{{ text }}</textarea>
+  </div>
+  <div class="actions">
+    <button class="btn primary" id="download" data-filename="tz_{{ mode }}_{{ tz_id[:6] }}.md">Скачать .md</button>
+    <a class="btn" href="{{ url_for('download_docx', tz_id=tz_id) }}">Скачать .docx</a>
+    <a class="btn ghost" href="{{ url_for('index') }}">Новое ТЗ</a>
+  </div>
+</section>
+<script>
+// Скачиваем ровно то, что сейчас в редакторе (с учётом ручных правок)
+document.getElementById('download').addEventListener('click', function () {
+  const blob = new Blob([document.getElementById('tz-text').value], {type: 'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = this.dataset.filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+server.log
+*.lnk
+payments.log
+qr_gost_pay.png
+notify.py
+payments.py

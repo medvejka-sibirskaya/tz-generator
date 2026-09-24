@@ -1,0 +1,289 @@
+/* TZ Generator — тёмно-зелёная тема по референсам Медвежки
+   (dribbble: тёмно-зелёный фон + жёлтый акцент, скруглённые карточки) */
+
+:root {
+  /* Палитра Медвежки.ру: только золото и тёмный фон */
+  --bg: #0a0f0e;
+  --bg2: #0a0f0e;
+  --card: #131c1a;
+  --line: #24302d;
+  --accent: #c59d41;        /* благородное золото */
+  --accent-soft: #26d36b;   /* hover-акцент (как на medvejka.ru) */
+  --text: #f0f4f3;
+  --muted: #a8b5b0;
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; }
+
+/* Заголовки — дорогие засечки, текст — Golos Text */
+h1, h2, .brand {
+  font-family: "Playfair Display", Georgia, serif;
+  letter-spacing: 0;
+}
+
+body {
+  margin: 0;
+  font-family: "Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg);
+  /* Золотые свечения по углам — как на medvejka.ru */
+  background-image:
+    radial-gradient(circle at 15% 18%, rgba(197, 157, 65, 0.12) 0%, rgba(197, 157, 65, 0.00) 26%),
+    radial-gradient(circle at 85% 78%, rgba(197, 157, 65, 0.10) 0%, rgba(197, 157, 65, 0.00) 24%),
+    radial-gradient(circle at 50% 105%, rgba(38, 211, 107, 0.07) 0%, rgba(38, 211, 107, 0.00) 20%);
+  color: var(--text);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+/* Вспыхивающие золотые искорки — фирменная фишка Медвежки.ру */
+.bg-sparks {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+main, header, footer { position: relative; z-index: 1; }
+.bg-spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(197, 157, 65, 0.7);
+  opacity: 0;
+  animation: bgSparkFlash 4s ease-in-out infinite;
+}
+.bg-spark:nth-child(1) { top: 10%; left: 20%; animation-delay: 0s; }
+.bg-spark:nth-child(2) { top: 30%; left: 70%; animation-delay: 0.8s; }
+.bg-spark:nth-child(3) { top: 55%; left: 15%; animation-delay: 1.6s; }
+.bg-spark:nth-child(4) { top: 65%; left: 60%; animation-delay: 2.2s; }
+.bg-spark:nth-child(5) { top: 40%; left: 40%; animation-delay: 3s; }
+.bg-spark:nth-child(6) { top: 20%; left: 80%; animation-delay: 1.2s; }
+.bg-spark:nth-child(7) { top: 75%; left: 30%; animation-delay: 2.8s; }
+.bg-spark:nth-child(8) { top: 85%; left: 75%; animation-delay: 3.4s; }
+.bg-spark:nth-child(9) { top: 15%; left: 50%; animation-delay: 0.4s; }
+.bg-spark:nth-child(10) { top: 50%; left: 90%; animation-delay: 2s; }
+@keyframes bgSparkFlash {
+  0%   { opacity: 0; transform: scale(0.3); }
+  30%  { opacity: 1; transform: scale(1); }
+  60%  { opacity: 1; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.3); }
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  color: var(--text);
+}
+.brand .accent { color: var(--accent); }
+
+/* Слоган — постоянная бегущая строка в правом верхнем углу */
+.slogan {
+  margin-left: auto;
+  align-self: center;
+  overflow: hidden;
+  max-width: 300px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.marquee {
+  display: flex;
+  width: max-content;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  animation: marquee 14s linear infinite;
+}
+.marquee em { font-style: normal; color: var(--accent); }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }   /* сдвиг на ширину одного куска = бесшовно */
+}
+@media (max-width: 640px) {
+  .slogan { max-width: 100%; width: 100%; order: 3; }
+  .marquee { font-size: 12px; }
+}
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px; }
+.foot {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 28px 0 34px;
+}
+.foot a { color: var(--muted); }
+
+/* --- Главная --- */
+.eyebrow {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 14px;
+}
+.hero h1 {
+  font-size: clamp(34px, 6vw, 54px);
+  line-height: 1.18;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+/* Курсивный акцент в заголовках — фирменный «дорогой» приём */
+h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.lead {
+  font-size: 19px;
+  color: var(--muted);
+  max-width: 60ch;
+  margin: 0 0 32px;
+}
+.lead strong { color: var(--text); }
+
+.modes { display: flex; gap: 18px; flex-wrap: wrap; margin: 0 0 48px; }
+.card {
+  flex: 1 1 300px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px;
+}
+.card h2 { margin: 0 0 4px; font-size: 22px; font-weight: 800; }
+.card.featured { border-color: rgba(255, 197, 49, 0.55); }
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+.badge.paid { border-color: var(--accent); color: var(--accent); }
+.card p { color: var(--muted); margin: 8px 0 18px; }
+.price { font-size: 26px; font-weight: 800; color: var(--text); }
+
+/* Кнопки: жёлтый pill с тёмным текстом */
+.btn {
+  display: inline-block;
+  padding: 12px 22px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  background: rgba(245, 241, 232, 0.1);
+  color: var(--text);
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.btn:hover { background: rgba(245, 241, 232, 0.18); }
+.btn.primary { background: var(--accent); color: var(--bg); border-color: transparent; }
+.btn.primary:hover { background: var(--accent-soft); }
+.btn.ghost { background: transparent; }
+
+.example-link {
+  display: inline-block;
+  margin: 14px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.example-link:hover { color: var(--accent); }
+
+/* Описание «что такое ТЗ» перед карточками */
+.intro { margin: 0 0 40px; }
+.intro h2 { font-size: 24px; font-weight: 700; margin: 0 0 14px; }
+.intro p { color: var(--muted); margin: 0 0 12px; }
+.intro strong { color: var(--text); }
+.seo h2 { font-size: 22px; font-weight: 800; margin: 0 0 12px; }
+.seo p { color: var(--muted); margin: 0 0 12px; }
+.seo strong { color: var(--text); }
+
+/* --- Форма --- */
+.form-page h1 { font-size: 32px; font-weight: 800; margin: 0 0 6px; }
+.note { color: var(--muted); margin: 0 0 24px; }
+.fields label {
+  display: block;
+  margin-bottom: 16px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.fields input,
+.fields textarea,
+.fields select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--text);
+  background: rgba(245, 241, 232, 0.06);
+}
+.fields input:focus,
+.fields textarea:focus,
+.fields select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.fields ::placeholder { color: rgba(159, 179, 166, 0.75); }
+.fields select option { background: var(--card); color: var(--text); }
+.fields button { margin-top: 10px; }
+
+/* --- Результат --- */
+.doc {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.doc textarea {
+  width: 100%;
+  height: 60vh;
+  resize: vertical;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font: 14px/1.7 Consolas, monospace;
+  white-space: pre-wrap;
+}
+.doc textarea:focus { border: none; }
+.actions { margin-top: 20px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+.result-page h1,
+.pay-page h1 { font-size: 32px; font-weight: 800; margin: 0 0 18px; }
+
+/* QR-код оплаты: белая подложка, чтобы читался в тёмной теме */
+.qr-box {
+  display: inline-block;
+  padding: 12px;
+  margin: 18px 0 6px;
+  background: #fff;
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .wrap { padding: 28px 16px; }
+  .hero h1 { font-size: 30px; }
+}

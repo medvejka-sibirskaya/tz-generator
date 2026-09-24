@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TZ Generator — генератор технических заданий онлайн{% endblock %}</title>
+  <meta name="description" content="{% block description %}Генератор ТЗ онлайн: облегчённое техническое задание бесплатно, полное ТЗ по ГОСТ за 100 ₽. Для фрилансеров, ботов, автоматизаций и веб-проектов.{% endblock %}">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{{ self.description() }}">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Golos+Text:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <!-- Фоновые золотые искорки (как на medvejka.ru) -->
+  <div class="bg-sparks">
+    <span class="bg-spark"></span><span class="bg-spark"></span><span class="bg-spark"></span>
+    <span class="bg-spark"></span><span class="bg-spark"></span><span class="bg-spark"></span>
+    <span class="bg-spark"></span><span class="bg-spark"></span><span class="bg-spark"></span>
+    <span class="bg-spark"></span>
+  </div>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">ТЗ<span class="accent">&nbsp;Генератор</span></a>
+    <div class="slogan" aria-label="Без хорошего ТЗ получается ХЗ">
+      <div class="marquee">
+        <!-- лента из двух одинаковых кусков = бесшовный круг -->
+        <span>Без хорошего ТЗ получается <em>ХЗ</em>&nbsp;✦&nbsp;Без хорошего ТЗ получается <em>ХЗ</em>&nbsp;✦&nbsp;</span>
+        <span>Без хорошего ТЗ получается <em>ХЗ</em>&nbsp;✦&nbsp;Без хорошего ТЗ получается <em>ХЗ</em>&nbsp;✦&nbsp;</span>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">TZ Generator — облегчённое ТЗ бесплатно, по ГОСТ — 100&nbsp;₽</footer>
+</body>
+</html>
