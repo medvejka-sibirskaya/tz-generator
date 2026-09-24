@@ -274,15 +274,6 @@ h1 em {
 .result-page h1,
 .pay-page h1 { font-size: 32px; font-weight: 800; margin: 0 0 18px; }
 
-/* QR-код оплаты: белая подложка, чтобы читался в тёмной теме */
-.qr-box {
-  display: inline-block;
-  padding: 12px;
-  margin: 18px 0 6px;
-  background: #fff;
-  border-radius: 12px;
-}
-
 @media (max-width: 480px) {
   .wrap { padding: 28px 16px; }
   .hero h1 { font-size: 30px; }

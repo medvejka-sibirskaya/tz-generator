@@ -3,21 +3,8 @@
 <section class="pay-page">
   <h1>ТЗ по ГОСТ — 100 ₽</h1>
   {% if pay_url %}
-  <p>Оплата через ЮMoney. После оплаты вернётесь на форму автоматически.</p>
+  <p>Оплата картой через ЮMoney. После оплаты вернётесь на форму автоматически.</p>
   <a class="btn primary" href="{{ pay_url }}">Оплатить 100 ₽</a>
-  <!-- QR с той же платёжной ссылкой: отсканил камерой -> попал на оплату.
-       Отрисовка на клиенте (qrcodejs с CDN), без python-зависимостей. -->
-  <div id="qrcode" class="qr-box" title="QR для оплаты с телефона"></div>
-  <p class="note">Или отсканируйте QR — оплата с телефона</p>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script>
-    new QRCode(document.getElementById("qrcode"), {
-      text: "{{ pay_url }}",
-      width: 180,
-      height: 180,
-      correctLevel: QRCode.CorrectLevel.M,
-    });
-  </script>
   {% else %}
   <p class="note">Приём платежей подключается — скоро заработает. Пока напиши нам, вышлем ТЗ по ГОСТ вручную.</p>
   {% endif %}

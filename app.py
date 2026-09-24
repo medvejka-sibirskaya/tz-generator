@@ -39,6 +39,7 @@ APP_URL = os.environ.get("APP_URL", "http://localhost:5000")
 LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "")   # напр. https://openrouter.ai/api/v1
 LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_MODEL = os.environ.get("LLM_MODEL", "")         # напр. yandexgpt-lite
+LLM_MODEL_PRO = os.environ.get("LLM_MODEL_PRO", "yandexgpt-5.1")  # модель для платного ГОСТ-режима
 LLM_FOLDER_ID = os.environ.get("LLM_FOLDER_ID", "") # только для Яндекс Cloud (ID каталога)
 
 POLISH_PROMPT = (
@@ -66,21 +67,24 @@ PROJECT_TYPES = {
 }
 
 
-def ai_polish(text: str) -> tuple[str, bool]:
+def ai_polish(text: str, model_name: str = "") -> tuple[str, bool]:
     """Полировка текста ТЗ через LLM (OpenAI-совместимый API).
 
+    model_name: какая модель полирует — lite для бесплатного режима,
+    Pro для платного ГОСТ (см. LLM_MODEL / LLM_MODEL_PRO).
     Чек-лист устойчивого сценария: таймаут + fallback — при любой ошибке
     (нет ключа, сеть, формат ответа) возвращаем исходный текст без полировки,
     генерация никогда не ломается.
     Возвращает (текст, был_ли_вызов_ИИ).
     """
-    if not (LLM_BASE_URL and LLM_API_KEY and LLM_MODEL):
+    base_model = model_name or LLM_MODEL
+    if not (LLM_BASE_URL and LLM_API_KEY and base_model):
         return text, False
     import json
     import urllib.request
     try:
         # Яндекс принимает модель как полный URI: gpt://<folder>/<модель>
-        model = LLM_MODEL if LLM_MODEL.startswith("gpt://") else f"gpt://{LLM_FOLDER_ID}/{LLM_MODEL}/latest"
+        model = base_model if base_model.startswith("gpt://") else f"gpt://{LLM_FOLDER_ID}/{base_model}/latest"
         req = urllib.request.Request(
             LLM_BASE_URL.rstrip("/") + "/chat/completions",
             data=json.dumps({
@@ -320,7 +324,9 @@ def generate():
 
     tz_id = secrets.token_hex(8)
     tz_text = build_light_tz(a) if mode == "light" else build_gost_tz(a)
-    tz_text, polished = ai_polish(tz_text)
+    # Платный ГОСТ полируем старшей моделью, бесплатный — лёгкой
+    polish_model = LLM_MODEL if mode == "light" else LLM_MODEL_PRO
+    tz_text, polished = ai_polish(tz_text, polish_model)
     TZ_STORE[tz_id] = {"mode": mode, "text": tz_text, "polished": polished}
     return redirect(url_for("result", tz_id=tz_id))
 
