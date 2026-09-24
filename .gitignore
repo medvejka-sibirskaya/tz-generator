@@ -9,3 +9,5 @@ payments.log
 qr_gost_pay.png
 notify.py
 payments.py
+*.docx
+~$*
