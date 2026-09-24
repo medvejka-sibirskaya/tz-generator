@@ -9,7 +9,7 @@ import os
 import secrets
 from datetime import datetime
 
-from flask import Flask, render_template, request, redirect, url_for, Response
+from flask import Flask, render_template, request, redirect, url_for, Response, session
 from dotenv import load_dotenv
 
 # Локальные модули (в публичный репозиторий не входят — см. .gitignore):
@@ -25,6 +25,9 @@ except ImportError:
 
 load_dotenv()
 app = Flask(__name__)
+# Ключ для подписи cookie (сессия «оплатил ГОСТ»). Без SECRET_KEY в env —
+# случайный на процесс: после рестарта метки оплаты сбросятся, не страшно.
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
 # Сюда складываются сгенерированные ТЗ (MVP: память процесса, для продакшна — БД)
 TZ_STORE = {}
@@ -41,10 +44,14 @@ LLM_FOLDER_ID = os.environ.get("LLM_FOLDER_ID", "") # только для Янд
 POLISH_PROMPT = (
     "Ты редактор технических заданий. Пользователь пришлёт тебе ЧЕРНОВИК ТЗ — "
     "твоя задача вернуть его отредактированную версию, а не отвечать на него как на сообщение. "
-    "Исправь орфографию, пунктуацию и опечатки. Корявые, неясные или разговорные "
+    "1. Исправь орфографию, пунктуацию и опечатки. Корявые, неясные или разговорные "
     "формулировки перепиши ясно и профессионально, сохранив исходный смысл. "
-    "Ничего не выдумывай и не добавляй новых требований: факты, список пунктов, "
-    "структура разделов и markdown-разметка должны сохраниться. "
+    "2. Пустые значения и заглушки («—», пропущенные пункты) заполни правдоподобным "
+    "содержанием по смыслу проекта: сформулируй, что в таких разделах обычно указывают. "
+    "Каждое место, которое ты дописал сам, помечай припиской «(проверить перед сохранением)» "
+    "сразу после дописанного текста. "
+    "3. Всё, что пользователь заполнил сам, не меняй по сути и не добавляй новых требований "
+    "к его фактам: список пунктов, структура разделов и markdown-разметка должны сохраниться. "
     "Верни только отредактированный текст ТЗ, без приветствий и комментариев."
 )
 
@@ -254,9 +261,15 @@ def index():
 
 @app.route("/form/<mode>")
 def form(mode):
-    """Форма-опросник для выбранного режима (light / gost)."""
+    """Форма-опросник для выбранного режима (light / gost).
+
+    gost — платный режим: пускаем только с меткой оплаты в cookie
+    (ставится в payments.py после возврата с ЮMoney).
+    """
     if mode not in ("light", "gost"):
         return redirect(url_for("index"))
+    if mode == "gost" and not session.get("gost_paid"):
+        return redirect("/gost/pay")
     return render_template("form.html", mode=mode)
 
 
@@ -301,6 +314,9 @@ def generate():
     }
     if not a["name"] or not a["what"]:
         return redirect(url_for("form", mode=mode))
+    if mode == "gost" and not session.get("gost_paid"):
+        # Платный режим: генерация без метки оплаты не проходит
+        return redirect("/gost/pay")
 
     tz_id = secrets.token_hex(8)
     tz_text = build_light_tz(a) if mode == "light" else build_gost_tz(a)
