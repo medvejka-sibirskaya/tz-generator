@@ -1,0 +1,13 @@
+# Секреты и локальные модули не должны попадать в образ
+.env
+payments.log
+notify.py
+payments.py
+qr_gost_pay.png
+venv/
+.venv/
+__pycache__/
+*.pyc
+server.log
+*.lnk
+.git/

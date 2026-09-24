@@ -63,8 +63,9 @@ venv\Scripts\python.exe app.py
 
 ```
 tz-generator/
-├── app.py            # Flask: генерация, оплата, экспорт, SEO
-├── notify.py         # Telegram-уведомления (fail-safe)
+├── app.py            # Flask: генерация, экспорт, SEO
+├── payments.py       # приём оплаты и TG-уведомления (приватный модуль, не публикуется)
+├── Dockerfile        # контейнер для деплоя
 ├── templates/        # index, form, result, gost_pay, example
 ├── static/style.css  # стили (тёмная тема, без фреймворков)
 ├── payments.log      # журнал платежей (создаётся в рантайме)
