@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="pay-page">
+  {% if token %}
+  <h1>Оплата прошла ✔</h1>
+  <p>Доступ к ГОСТ-режиму открыт. Сохраните вечную ссылку — по ней доступ
+    восстанавливается в любом браузере, даже если кэш почистили или открыли
+    сайт с телефона:</p>
+  <p class="note" style="word-break: break-all;">
+    <a href="{{ url_for('payments.gost_access', token=token) }}">{{ app_url }}{{ url_for('payments.gost_access', token=token) }}</a>
+  </p>
+  <p><a class="btn" href="{{ url_for('payments.gost_access', token=token) }}">Продолжить — открыть ТЗ по ГОСТ</a></p>
+  {% else %}
+  <h1>Ссылка доступа недействительна</h1>
+  <p>Такой вечной ссылки нет в журнале платежей. Если вы платили и потеряли
+    доступ — напишите нам в Telegram, откроем по номеру операции вручную.</p>
+  <p><a class="btn ghost" href="{{ url_for('index') }}">На главную</a></p>
+  {% endif %}
+</section>
+{% endblock %}
