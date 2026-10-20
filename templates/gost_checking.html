@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="pay-page">
+  {% if timeout %}
+  <h1>Оплата пока не подтвердилась</h1>
+  <p>Прождали около минуты, но подтверждение от ЮMoney не пришло.</p>
+  <p class="note">Если ты уже заплатил(а) — напиши нам в Telegram, откроем доступ вручную
+    (иногда уведомления задерживаются). Если передумал(а) — ничего страшного, оплата не прошла.</p>
+  {% else %}
+  <h1>Проверяем оплату…</h1>
+  <p class="note">Минутку, сверяемся с ЮMoney — страница обновится сама.</p>
+  <script>setTimeout(function () { location.href = "{{ url_for('payments.gost_paid', wait=wait + 1) }}"; }, 4000);</script>
+  {% endif %}
+  <p><a class="btn ghost" href="{{ url_for('index') }}">На главную</a></p>
+</section>
+{% endblock %}
