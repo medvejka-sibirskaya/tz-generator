@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="pay-page">
+  <h1>Панель Медвежки</h1>
+
+  {% if not logged %}
+    <p class="note">{{ error or "Введи ключ доступа — он из env (ADMIN_TOKEN), на ПК и телефоне один и тот же." }}</p>
+    <form method="post" action="{{ url_for('admin.admin') }}">
+      <input type="password" name="token" placeholder="Ключ" required
+             style="padding:10px 14px; border-radius:10px; min-width:220px;">
+      <button class="btn primary" type="submit">Войти</button>
+    </form>
+  {% else %}
+    <p><a class="btn ghost" href="{{ url_for('admin.admin_logout') }}">Выйти</a></p>
+
+    <h2>Ручное открытие доступа</h2>
+    <p class="note">Впиши метку платежа (видна в журнале ниже) — покупателю доступ откроется сразу.</p>
+    <form method="post" action="{{ url_for('admin.admin_grant') }}" style="display:flex; gap:8px; flex-wrap:wrap;">
+      <input type="text" name="label" placeholder="метка, напр. tz-gost-abc12345" required
+             style="padding:10px 14px; border-radius:10px; min-width:260px;">
+      <button class="btn primary" type="submit">Открыть доступ</button>
+    </form>
+
+    <h2>Журнал платежей (свежие сверху)</h2>
+    {% if rows %}
+    <div style="overflow-x:auto;">
+    <table style="border-collapse:collapse; width:min(700px,100%);">
+      <thead>
+        <tr style="text-align:left;">
+          <th style="padding:6px 10px;">Время</th><th>Метка</th><th>Сумма</th><th>Статус</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td style="padding:6px 10px; white-space:nowrap;">{{ r.time or '—' }}</td>
+          <td style="padding:6px 10px;"><code>{{ r.label or '—' }}</code></td>
+          <td style="padding:6px 10px;">{{ r.amount or '—' }}</td>
+          <td style="padding:6px 10px;">
+            {% if r.status == 'confirmed' %}<b>{{ r.status }}</b>{% else %}{{ r.status }}{% endif %}
+            {% if r.reason %}<br><small>{{ r.reason }}</small>{% endif %}
+          </td>
+          <td style="padding:6px 10px;">
+            {% if r.status != 'confirmed' and r.label %}
+            <form method="post" action="{{ url_for('admin.admin_grant') }}">
+              <input type="hidden" name="from_label" value="{{ r.label }}">
+              <button class="btn ghost" type="submit">Открыть</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    {% else %}
+    <p class="note">Журнал пока пуст.</p>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

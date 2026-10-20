@@ -468,5 +468,10 @@ except ImportError:
         return render_template("gost_pay.html", pay_url=None, label="")
 
 
+# Админ-панель (журнал платежей + ручное открытие доступа); секрет — в env
+from admin import bp as admin_bp
+app.register_blueprint(admin_bp)
+
+
 if __name__ == "__main__":
     app.run(debug=True)
