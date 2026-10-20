@@ -12,3 +12,4 @@ payments.py
 pay_test.py
 *.docx
 ~$*
+private_backup/
