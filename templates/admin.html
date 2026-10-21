@@ -21,6 +21,11 @@
       <button class="btn primary" type="submit">Открыть доступ</button>
     </form>
 
+    {% if granted_link %}
+    <p class="note">✅ Доступ открыт. <b>Вечная ссылка покупателю</b> (покажи/перешли):<br>
+      <code>{{ granted_link }}</code></p>
+    {% endif %}
+
     <h2>Журнал платежей (свежие сверху)</h2>
     {% if rows %}
     <div style="overflow-x:auto;">

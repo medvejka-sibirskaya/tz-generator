@@ -1,13 +1,21 @@
 # Секреты и локальные модули не должны попадать в образ
 .env
+.env.*
+!.env.example
+*.log
 payments.log
 notify.py
 payments.py
+pay_test.py
 qr_gost_pay.png
 venv/
 .venv/
 __pycache__/
 *.pyc
-server.log
 *.lnk
 .git/
+# личное/сервисное — в образ не нужно и не должно утекать
+private_backup/
+docs/
+CLAUDE.md
+.claude/

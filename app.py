@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 """TZ Generator — генератор технических заданий.
 
-Финальный проект курса Claude Code. Два режима:
+ Два режима:
 - облегчённый (бесплатно) — скелет ТЗ + типовые блоки под тип проекта;
 - по ГОСТ (100 ₽, ЮMoney) — полная структура со стадиями и требованиями.
 """
 import os
+import sys
+import json
+import time
 import secrets
+import threading
 from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, Response, session
@@ -24,10 +28,24 @@ except ImportError:
     notify = _SilentNotify()
 
 load_dotenv()
+APP_URL = os.environ.get("APP_URL", "http://localhost:5000")
+IS_PROD = APP_URL.startswith("https://")   # в проде APP_URL всегда https
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
+
 app = Flask(__name__)
-# Ключ для подписи cookie (сессия «оплатил ГОСТ»). Без SECRET_KEY в env —
-# случайный на процесс: после рестарта метки оплаты сбросятся, не страшно.
-app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+# Ключ подписи cookie (сессия «оплатил ГОСТ»). На проде — обязателен в env
+# (Dokploy): без фиксированного ключа при рестарте/в репликах cookie одной
+# реплики отбивается другой. Локально без него — случайный на процесс.
+if IS_PROD and not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY не задан, а APP_URL — прод-адрес. Обязательная переменная "
+        "env Dokploy (см. .env.example и docs/deploy-checklist-2026-10.md)."
+    )
+app.secret_key = SECRET_KEY or secrets.token_hex(32)
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"   # явно: cookie не цепляются к cross-site POST
+if IS_PROD:
+    app.config["SESSION_COOKIE_SECURE"] = True  # cookie только по HTTPS
+app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024  # 1 МБ: ограничиваем размер POST-формы
 
 # Серверные ошибки на проде: покупатель НЕ должен видеть голую 500-страницу.
 # Платежи при этом подтверждены в журнале; человек может вернуть доступ
@@ -40,16 +58,30 @@ def _server_error(e):
         "<h2>Что-то сломалось на нашей стороне</h2>"
         "<p>Если вы только что оплатили доступ — оплата принята, "
         "ничего не потеряно: доступ обычно открывается за минуту.</p>"
-        "<p>Не открылся? Напишите нам в Telegram — откроем вручную.</p>"
+        "<p>Не открылся? Напишите нам в Telegram @medvejka_sibirskaya — откроем доступ вручную.</p>"
         "<p><a href='/'>На главную</a></p></html>",
         500,
     )
 
-# Сюда складываются сгенерированные ТЗ (MVP: память процесса, для продакшна — БД)
+# Сюда складываются сгенерированные ТЗ (MVP: память процесса, для продакшна — БД).
+# Потолок и TTL: /generate открыт всем — без лимита память растёт без границ.
 TZ_STORE = {}
+TZ_STORE_TTL = 24 * 3600   # записи старше суток — к удалению
+TZ_STORE_MAX = 200         # больше записей — вытесняем самые старые
+
+
+def _tz_store_put(tz_id: str, item: dict) -> None:
+    """Положить ТЗ в хранилище, ограничив память (TTL + потолок + timestamp)."""
+    now = time.time()
+    for k in [k for k, v in TZ_STORE.items() if now - v.get("ts", now) > TZ_STORE_TTL]:
+        TZ_STORE.pop(k, None)
+    while len(TZ_STORE) >= TZ_STORE_MAX:   # вытесняем самое старое
+        TZ_STORE.pop(min(TZ_STORE, key=lambda k: TZ_STORE[k].get("ts", 0)), None)
+    item["ts"] = now
+    TZ_STORE[tz_id] = item
+
 
 # env-конфиг: секреты и реквизиты не храним в коде (см. .env.example)
-APP_URL = os.environ.get("APP_URL", "http://localhost:5000")
 
 # LLM-полировка (OpenAI-совместимый API): ключи и адрес — только в .env
 LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "")   # напр. https://openrouter.ai/api/v1
@@ -85,6 +117,29 @@ PROJECT_TYPES = {
     "site": "Сайт / веб-приложение",
     "creative": "Дизайн / тексты / медиа",
 }
+
+# Anti-«душа платного пути»: LLM-полировка до 60 с, у сервиса ОДИН воркер и
+# 8 потоков — восемь бесплатных генераций поставят /gost/notify в очередь,
+# а у ЮMoney всего 3 попытки доставки уведомления. Поэтому:
+#  - LLM-полировка — максимум LLM_MAX_CONCURRENT одновременно; очередь дольше
+#    LLM_QUEUE_WAIT не ждём: отдаём ТЗ без полировки (это деградация, не срыв);
+#  - POST /generate — не больше GEN_RATE_LIMIT_PER_HOUR с одного IP;
+#  - размер формы ограничен MAX_CONTENT_LENGTH (ставится при создании app).
+LLM_SEMAPHORE = threading.Semaphore(3)
+LLM_QUEUE_WAIT = 2         # сколько секунд ждём место в очереди полировки
+GEN_RATE_LIMIT_PER_HOUR = 10
+_GEN_TIMES: dict = {}      # ip -> времена POST /generate (скользящее окно час)
+
+
+def _ip_rate_ok(ip: str) -> bool:
+    """Скользящее окно на час: не больше GEN_RATE_LIMIT_PER_HOUR POST /generate."""
+    now = time.time()
+    times = [t for t in _GEN_TIMES.get(ip, []) if now - t < 3600]
+    _GEN_TIMES[ip] = times
+    if len(times) >= GEN_RATE_LIMIT_PER_HOUR:
+        return False
+    times.append(now)
+    return True
 
 
 def ai_polish(text: str, model_name: str = "") -> tuple[str, bool]:
@@ -312,6 +367,10 @@ def generate():
 
     Для gost без подтверждённой оплаты — возвращаем на страницу оплаты.
     """
+    if not _ip_rate_ok(request.remote_addr or "?"):
+        # Бесплатный режим без лимитов можно зафлудить — а каждый POST несёт
+        # потенциальную LLM-полировку и занимает потоки (один воркер на всех).
+        return ("Слишком много генераций с этого адреса — попробуйте через час.", 429)
     mode = request_mode()
     a = {
         "name": request.form.get("name", "").strip(),
@@ -344,13 +403,33 @@ def generate():
     if mode == "gost" and not session.get("gost_paid"):
         # Платный режим: генерация без метки оплаты не проходит
         return redirect("/gost/pay")
+    if mode == "gost" and session.get("gost_token"):
+        # Вечные ссылки легко переслать — без потолка это безлимитный платный
+        # режим на дорогой модели за 100 ₽. Считаем генерации по токену.
+        try:
+            from payments import consume_generation
+            allowed, _left = consume_generation(session["gost_token"])
+            if not allowed:
+                return ("Лимит генераций по вашему доступу исчерпан. "
+                        "Пишите Telegram @medvejka_sibirskaya — продлим.", 403)
+        except ImportError:
+            pass
 
     tz_id = secrets.token_hex(8)
     tz_text = build_light_tz(a) if mode == "light" else build_gost_tz(a)
-    # Платный ГОСТ полируем старшей моделью, бесплатный — лёгкой
-    polish_model = LLM_MODEL if mode == "light" else LLM_MODEL_PRO
-    tz_text, polished = ai_polish(tz_text, polish_model)
-    TZ_STORE[tz_id] = {"mode": mode, "text": tz_text, "polished": polished}
+    # Платный ГОСТ полируем старшей моделью, бесплатный — лёгкой.
+    # Очередь на полировку ждём максимум LLM_QUEUE_WAIT секунд: если все места
+    # заняты, отдаём ТЗ без ИИ, не задерживая поток ради одного запроса.
+    polished = False
+    if LLM_SEMAPHORE.acquire(timeout=LLM_QUEUE_WAIT):
+        try:
+            polish_model = LLM_MODEL if mode == "light" else LLM_MODEL_PRO
+            tz_text, polished = ai_polish(tz_text, polish_model)
+        finally:
+            LLM_SEMAPHORE.release()
+    else:
+        print("[ai_polish] очередь полировки занята — отдаём ТЗ без ИИ")
+    _tz_store_put(tz_id, {"mode": mode, "text": tz_text, "polished": polished})
     return redirect(url_for("result", tz_id=tz_id))
 
 
@@ -437,6 +516,18 @@ def download_docx(tz_id):
     )
 
 
+@app.route("/healthz")
+def healthz():
+    """Наблюдаемость без раскрытия секретов: что загружено и что задано (только bool)."""
+    return Response(json.dumps({
+        "status": "ok",
+        "payments_module": "payments" in sys.modules,          # журнал и деньги на месте
+        "notify_module": type(notify).__name__ != "_SilentNotify",
+        "yoomoney_receiver": bool(os.environ.get("YOOMONEY_RECEIVER")),
+        "yoomoney_secret": bool(os.environ.get("YOOMONEY_SECRET")),
+    }, ensure_ascii=False), mimetype="application/json")
+
+
 # --- SEO: robots.txt и sitemap.xml ------------------------------------------------
 
 
@@ -478,6 +569,12 @@ try:
     from payments import bp as payments_bp
     app.register_blueprint(payments_bp)
 except ImportError:
+    # Локально без payments.py — заглушка (/gost/pay без кнопки). На проде
+    # это критично: notify вернёт 404, доступ не откроется — кричим в stderr,
+    # чтобы увидеть это в логах контейнера сразу при старте.
+    if IS_PROD:
+        print("[APP] КРИТИЧНО: payments.py не найден — оплата и доступ НЕ работают!",
+              file=sys.stderr)
 
     @app.route("/gost/pay")
     def gost_pay_stub():
@@ -490,4 +587,6 @@ app.register_blueprint(admin_bp)
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # debug — только явно (FLASK_DEBUG=1, локальная разработка); на сервере
+    # gunicorn, и это ветка не исполняется.
+    app.run(debug=os.environ.get("FLASK_DEBUG") == "1")

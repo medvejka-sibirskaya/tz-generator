@@ -1,15 +1,26 @@
 __pycache__/
 *.pyc
-.env
 venv/
 .venv/
-server.log
-*.lnk
-payments.log
-qr_gost_pay.png
+# секреты
+.env
+.env.*
+!.env.example
+# приватные модули и журналы (сервер: /opt/tz-private)
 notify.py
 payments.py
 pay_test.py
+payments.log
+*.log
 *.docx
 ~$*
+# локальные артефакты
+server.log
+*.lnk
+qr_gost_pay.png
 private_backup/
+# внутренние документы и админ-заметки — не для публичного репозитория
+CLAUDE.md
+docs/
+# не коммитим локальные настройки Claude
+.claude/settings.local.json
