@@ -274,7 +274,56 @@ h1 em {
 .result-page h1,
 .pay-page h1 { font-size: 32px; font-weight: 800; margin: 0 0 18px; }
 
+/* --- Админ-панель (та же тема: тёмный изумруд + золото) --- */
+.admin { max-width: 760px; margin: 0 auto; }
+.admin-head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin: 0 0 22px;
+}
+.admin-head h1 { font-size: 30px; font-weight: 800; margin: 0; }
+.admin-card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 26px; margin: 0 0 20px;
+}
+.admin-card .badge { margin-bottom: 10px; }
+.admin-card .note { margin: 0 0 14px; }
+.admin-form { display: flex; gap: 10px; flex-wrap: wrap; }
+.admin-form input[type="text"],
+.admin-form input[type="password"] {
+  flex: 1 1 240px; padding: 11px 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: var(--bg2);
+  color: var(--text); font: inherit;
+}
+.admin-form input:focus { outline: none; border-color: var(--accent); }
+.admin-err { color: #ff9c9c; margin: 4px 0 12px; }
+.admin-link-ok {
+  background: rgba(197, 157, 65, 0.08); border: 1px solid var(--accent);
+  border-radius: 12px; padding: 12px 16px; margin: 14px 0 0; color: var(--text);
+}
+.admin-link-ok code { color: var(--accent); overflow-wrap: anywhere; }
+.admin-table-title { font-size: 22px; font-weight: 800; margin: 26px 0 2px; }
+.admin-sub { margin: -4px 0 12px; }
+.admin-scroll {
+  overflow-x: auto; background: var(--card);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 6px 18px 14px;
+}
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); font-weight: 600;
+  padding: 12px 10px 8px; border-bottom: 1px solid var(--line);
+}
+.admin-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table td code { color: var(--accent); overflow-wrap: anywhere; }
+.admin-table .nowrap { white-space: nowrap; }
+.admin-status.confirmed { color: var(--accent-soft); }
+.admin-status.other { color: var(--muted); }
+.admin-reason { color: var(--muted); font-size: 12.5px; }
+
 @media (max-width: 480px) {
   .wrap { padding: 28px 16px; }
   .hero h1 { font-size: 30px; }
+  .admin-head h1 { font-size: 24px; }
 }
