@@ -76,7 +76,7 @@ def admin():
                                error="ADMIN_TOKEN не задан в env — панель закрыта")
     error = ""
     if request.method == "POST":
-        token = request.form.get("token", "")
+        token = request.form.get("token", "").strip()  # копипаст любит приносить пробел на конце
         try:
             # compare_digest на байтах: на не-ASCII строке со str он падает
             # TypeError'ом (500-страница на самом входе админки).
