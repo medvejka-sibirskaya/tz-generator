@@ -19,9 +19,9 @@
 
 ## Скриншоты
 
-![Главная](screenshots/index.png)
-![Форма](screenshots/forms.png)
-![Результат](screenshots/result.png)
+![Главная](screenshots/tz_index.png)
+![Форма](screenshots/tz_forms.png)
+![Результат](screenshots/tz_result.png)
 
 ## Стек
 
