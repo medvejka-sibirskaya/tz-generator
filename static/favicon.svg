@@ -1,5 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Фирменная иконка: золотая искра на тёмном (стиль сайта) -->
+  <!-- Фирменная иконка: буквы «ТЗ» золотом на тёмном (стиль сайта) -->
   <rect width="64" height="64" rx="14" fill="#0f1715"/>
-  <path d="M32 10 L37 27 L54 32 L37 37 L32 54 L27 37 L10 32 L27 27 Z" fill="#c59d41"/>
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central"
+        font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
+        font-size="30" fill="#c59d41">ТЗ</text>
 </svg>
