@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Панель Медвежки — TZ Generator{% endblock %}
+{% block title %}Панель администратора — TZ Generator{% endblock %}
 {% block content %}
 <section class="admin">
   {% if not logged %}
     <div class="admin-card">
-      <span class="badge paid">Панель Медвежки</span>
+      <span class="badge paid">Административный доступ</span>
       <h2>Кто здесь?</h2>
       <p class="note">{{ error or "Введи ключ доступа — он из env (ADMIN_TOKEN): на ПК и телефоне один и тот же." }}</p>
       {% if error %}<p class="admin-err">{{ error }}</p>{% endif %}
@@ -15,7 +15,7 @@
     </div>
   {% else %}
     <div class="admin-head">
-      <h1>Панель Медвежки</h1>
+      <h1>Панель администратора</h1>
       <a class="btn ghost" href="{{ url_for('admin.admin_logout') }}">Выйти</a>
     </div>
 

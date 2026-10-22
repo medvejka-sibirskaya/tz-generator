@@ -113,7 +113,7 @@ def admin_grant():
     from_label = request.form.get("from_label", "").strip()
     target = label or from_label  # с формы журнала приходит from_label, с ручной — label
     if payments is not None and LABEL_RE.fullmatch(target):
-        token = payments.grant_access(target, "Открыто вручную через админ-панель Медвежки")
+        token = payments.grant_access(target, "Открыто вручную через панель администратора")
         if token:
             # Ссылку показываем на следующей странице (через сессию, а не query —
             # она попадёт в историю браузера).
