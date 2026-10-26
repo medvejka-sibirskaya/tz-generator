@@ -1,16 +1,16 @@
-/* TZ Generator — тёмно-зелёная тема по референсам Медвежки
-   (dribbble: тёмно-зелёный фон + жёлтый акцент, скруглённые карточки) */
+/* TZ Generator — «петроль + золото» по обложке (screenshots/tz_00.JPG):
+   глубокий тёмно-бирюзовый фон, бирюзовое свечение сверху, золотые акценты */
 
 :root {
-  /* Палитра Медвежки.ру: только золото и тёмный фон */
-  --bg: #0a0f0e;
-  --bg2: #0a0f0e;
-  --card: #131c1a;
-  --line: #24302d;
-  --accent: #c59d41;        /* благородное золото */
-  --accent-soft: #26d36b;   /* hover-акцент (как на medvejka.ru) */
-  --text: #f0f4f3;
-  --muted: #a8b5b0;
+  /* Палитра Медвежки.ру: петроль, золото и ничего лишнего */
+  --bg: #04141d;
+  --bg2: #04141d;
+  --card: #0a2733;
+  --line: #1c4550;
+  --accent: #d4af6a;        /* золото с обложки */
+  --accent-soft: #e7c987;   /* hover-акцент — светлое золото */
+  --text: #eef6f7;
+  --muted: #9db9bf;
   --radius: 18px;
 }
 
@@ -26,11 +26,12 @@ body {
   margin: 0;
   font-family: "Golos Text", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg);
-  /* Золотые свечения по углам — как на medvejka.ru */
+  /* Бирюзовое свечение сверху и по нижним углам, чуть золота в центре — как на обложке */
   background-image:
-    radial-gradient(circle at 15% 18%, rgba(197, 157, 65, 0.12) 0%, rgba(197, 157, 65, 0.00) 26%),
-    radial-gradient(circle at 85% 78%, rgba(197, 157, 65, 0.10) 0%, rgba(197, 157, 65, 0.00) 24%),
-    radial-gradient(circle at 50% 105%, rgba(38, 211, 107, 0.07) 0%, rgba(38, 211, 107, 0.00) 20%);
+    radial-gradient(ellipse 70% 55% at 50% 10%, rgba(30, 130, 155, 0.22) 0%, rgba(30, 130, 155, 0.00) 60%),
+    radial-gradient(circle at 12% 88%, rgba(30, 130, 155, 0.12) 0%, rgba(30, 130, 155, 0.00) 30%),
+    radial-gradient(circle at 88% 86%, rgba(30, 130, 155, 0.12) 0%, rgba(30, 130, 155, 0.00) 30%),
+    radial-gradient(circle at 50% 42%, rgba(212, 175, 106, 0.05) 0%, rgba(212, 175, 106, 0.00) 35%);
   color: var(--text);
   line-height: 1.6;
   font-size: 16px;
@@ -51,7 +52,7 @@ main, header, footer { position: relative; z-index: 1; }
   height: 3px;
   background: var(--accent);
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(197, 157, 65, 0.7);
+  box-shadow: 0 0 8px rgba(212, 175, 106, 0.7);
   opacity: 0;
   animation: bgSparkFlash 4s ease-in-out infinite;
 }
@@ -163,7 +164,7 @@ h1 em {
   padding: 26px;
 }
 .card h2 { margin: 0 0 4px; font-size: 22px; font-weight: 800; }
-.card.featured { border-color: rgba(255, 197, 49, 0.55); }
+.card.featured { border-color: rgba(212, 175, 106, 0.55); }
 .badge {
   display: inline-block;
   font-size: 12px;
@@ -246,7 +247,7 @@ h1 em {
   outline: none;
   border-color: var(--accent);
 }
-.fields ::placeholder { color: rgba(159, 179, 166, 0.75); }
+.fields ::placeholder { color: rgba(157, 185, 191, 0.65); }
 .fields select option { background: var(--card); color: var(--text); }
 .fields button { margin-top: 10px; }
 
@@ -274,7 +275,7 @@ h1 em {
 .result-page h1,
 .pay-page h1 { font-size: 32px; font-weight: 800; margin: 0 0 18px; }
 
-/* --- Админ-панель (та же тема: тёмный изумруд + золото) --- */
+/* --- Админ-панель (та же тема: петроль + золото) --- */
 .admin { max-width: 760px; margin: 0 auto; }
 .admin-head {
   display: flex; align-items: baseline; justify-content: space-between;
@@ -297,7 +298,7 @@ h1 em {
 .admin-form input:focus { outline: none; border-color: var(--accent); }
 .admin-err { color: #ff9c9c; margin: 4px 0 12px; }
 .admin-link-ok {
-  background: rgba(197, 157, 65, 0.08); border: 1px solid var(--accent);
+  background: rgba(212, 175, 106, 0.08); border: 1px solid var(--accent);
   border-radius: 12px; padding: 12px 16px; margin: 14px 0 0; color: var(--text);
 }
 .admin-link-ok code { color: var(--accent); overflow-wrap: anywhere; }

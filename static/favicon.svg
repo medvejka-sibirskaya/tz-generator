@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- Фирменная иконка: «ТЗ» золотом на тёмно-зелёном (цвет карточек сайта) -->
-  <rect width="64" height="64" rx="14" fill="#131c1a"/>
+  <!-- Фирменная иконка: «ТЗ» золотом на петрольном (цвет карточек сайта) -->
+  <rect width="64" height="64" rx="14" fill="#0a2733"/>
   <text x="32" y="33" text-anchor="middle" dominant-baseline="central"
         font-family="Georgia, 'Times New Roman', serif" font-weight="bold"
-        font-size="30" fill="#c59d41">ТЗ</text>
+        font-size="30" fill="#d4af6a">ТЗ</text>
 </svg>
